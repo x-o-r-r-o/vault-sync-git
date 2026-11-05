@@ -626,6 +626,8 @@ export const es: Partial<Record<keyof typeof en, string>> = {
 	"s.onOpenDesc": "Obtiene la versión más reciente antes de que edites, como máximo cada 30 segundos.",
 	"s.badges": "Mostrar el estado de sincronización en el explorador de archivos",
 	"s.badgesDesc": "Un punto en los archivos editados desde la última sincronización y un aviso en las copias en conflicto.",
+	"s.badgesBefore": "Mostrar los puntos y avisos antes del nombre de archivo",
+	"s.badgesBeforeDesc": "Los puntos y avisos se muestran antes del nombre de archivo en lugar de después.",
 	"s.noticesAuto": "Automático (cambios en móviles, errores en escritorio)",
 	"s.noticesChanges": "Cuando cambian archivos, y errores",
 	"s.cfgPluginSettingsDesc": "Las opciones de cada complemento (data.json).",

@@ -8,7 +8,9 @@ import { conflictCopyOriginal } from "./util.ts";
 import { t } from "./i18n.ts";
 
 const PENDING = "vsg-x-pending";
+const PENDING_BEFORE = "vsg-x-pending-before";
 const CONFLICT = "vsg-x-conflict";
+const CONFLICT_BEFORE = "vsg-x-conflict-before";
 const EXCLUDED = "vsg-x-excluded";
 const ROWS = ".nav-file-title[data-path], .nav-folder-title[data-path]";
 
@@ -23,13 +25,15 @@ export class ExplorerBadges {
 	/** What the scope depends on (settings, device scope, `sync: false` notes, files created/deleted/renamed). */
 	private scopeKey: (() => string) | null;
 	private excludedKey: string | null = null;
+	private before: (() => boolean) | null;
 
-	constructor(app: App, pending: () => Set<string>, enabled: () => boolean, synced?: () => (path: string) => boolean, scopeKey?: () => string) {
+	constructor(app: App, pending: () => Set<string>, enabled: () => boolean, synced?: () => (path: string) => boolean, scopeKey?: () => string, before?: () => boolean) {
 		this.app = app;
 		this.pending = pending;
 		this.enabled = enabled;
 		this.synced = synced ?? null;
 		this.scopeKey = scopeKey ?? null;
+		this.before = before ?? null;
 	}
 
 	/** Files that don't sync, and folders with nothing inside that syncs. Recomputed only when the scope key changes. */
@@ -107,13 +111,30 @@ export class ExplorerBadges {
 	}
 
 	private markAll(root: HTMLElement) {
+		const before = this.before?.() ?? false;
 		const rows = root.matches?.(ROWS) ? [root] : Array.from(root.querySelectorAll<HTMLElement>(ROWS));
 		for (const el of rows) {
 			const path = el.dataset.path ?? "";
 			const cls = this.status.get(path);
 			const out = this.excluded.has(path);
-			el.toggleClass(PENDING, cls === PENDING && !out);
-			el.toggleClass(CONFLICT, cls === CONFLICT);
+			if (cls === PENDING && !out) {
+				if (before) {
+					el.addClass(PENDING_BEFORE);
+					el.removeClass(PENDING);
+				} else {
+					el.addClass(PENDING);
+					el.removeClass(PENDING_BEFORE);
+				}
+			}
+			if (cls === CONFLICT) {
+				if (before) {
+					el.addClass(CONFLICT_BEFORE);
+					el.removeClass(CONFLICT);
+				} else {
+					el.addClass(CONFLICT);
+					el.removeClass(CONFLICT_BEFORE);
+				}
+			}
 			el.toggleClass(EXCLUDED, out);
 			if (out) {
 				el.setAttr("aria-description", t("x.excluded"));
@@ -131,8 +152,8 @@ export class ExplorerBadges {
 	}
 
 	private clear(root: HTMLElement) {
-		for (const el of Array.from(root.querySelectorAll<HTMLElement>(`.${PENDING}, .${CONFLICT}, .${EXCLUDED}`))) {
-			el.removeClasses([PENDING, CONFLICT, EXCLUDED]);
+		for (const el of Array.from(root.querySelectorAll<HTMLElement>(`.${PENDING}, .${PENDING_BEFORE}, .${CONFLICT_BEFORE}, .${EXCLUDED}`))) {
+			el.removeClasses([PENDING, PENDING_BEFORE, CONFLICT, CONFLICT_BEFORE, EXCLUDED]);
 			el.removeAttribute("aria-description");
 			if (el.dataset.vsgTip) {
 				el.removeAttribute("title");

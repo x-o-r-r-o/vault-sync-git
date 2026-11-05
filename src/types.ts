@@ -76,6 +76,8 @@ export interface VaultSyncSettings {
 	syncOnOpen: boolean;
 	/** Mark files in the file explorer: edited since the last sync, conflict copies. */
 	explorerBadges: boolean;
+	/** Shows the badges before the file name in the file explorer, not after. */
+	explorerBadgesBefore: boolean;
 	/** Mark lines changed since the last sync in the editor gutter. */
 	changeMarkers: boolean;
 	wizardShown: boolean;
@@ -169,6 +171,7 @@ export const DEFAULT_SETTINGS: VaultSyncSettings = {
 	noticeLevel: "auto",
 	syncOnOpen: false,
 	explorerBadges: true,
+	explorerBadgesBefore: false,
 	changeMarkers: true,
 	wizardShown: false,
 	sharedFolders: [],

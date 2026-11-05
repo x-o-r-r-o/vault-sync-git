@@ -219,7 +219,7 @@ export default class VaultSyncPlugin extends Plugin implements SyncHost {
 			if (!payload) return void new Notice(t("link.invalid"));
 			new ApplySetupLinkModal(this.app, this, payload).open();
 		});
-		this.badges = new ExplorerBadges(this.app, () => this.pendingLocalPaths(), () => this.settings.explorerBadges && this.isConfigured(), () => this.syncedPathTest(), () => this.explorerScopeKey());
+		this.badges = new ExplorerBadges(this.app, () => this.pendingLocalPaths(), () => this.settings.explorerBadges && this.isConfigured(), () => this.syncedPathTest(), () => this.explorerScopeKey(), () => this.settings.explorerBadgesBefore,);
 		this.badgeTimer = debounce(() => {
 			if (!this.unloaded) this.badges?.refresh();
 		}, 1500, true);
