@@ -615,6 +615,8 @@ export const fr: Partial<Record<keyof typeof en, string>> = {
 	"s.onOpenDesc": "Récupère la dernière version avant que vous ne la modifiiez, au plus toutes les 30 secondes.",
 	"s.badges": "Afficher l'état de synchronisation dans l'explorateur de fichiers",
 	"s.badgesDesc": "Un point sur les fichiers modifiés depuis la dernière synchronisation, et un avertissement sur les copies en conflit.",
+	"s.badgesBefore": "Afficher l'état de synchronisation avant le nom de fichier",
+	"s.badgesBeforeDesc": "Le point qui est affiché sur les fichiers modifiés depuis la dernière synchronisation, et l'avertissement sur les copies en conflit, apparaissent avant le nom de fichier.",
 	"s.noticesAuto": "Automatique (modifications sur téléphone, erreurs sur ordinateur)",
 	"s.noticesChanges": "Quand des fichiers ont changé, et en cas d'erreur",
 	"s.cfgPluginSettingsDesc": "Les options de chaque plugin (data.json).",

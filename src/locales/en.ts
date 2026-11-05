@@ -624,6 +624,8 @@ export const en = {
 	"s.onOpenDesc": "Fetches the latest version before you edit, at most every 30 seconds.",
 	"s.badges": "Show sync status in the file explorer",
 	"s.badgesDesc": "A dot on files edited since the last sync, and a warning on conflict copies.",
+	"s.badgesBefore": "Show sync status before the file name",
+	"s.badgesBeforeDesc": "The dot that is shown on files edited since the last sync, and the warning on conflict copies, appear before the file name instead of after it.",
 	"s.noticesAuto": "Automatic (changes on phones, errors on desktop)",
 	"s.noticesChanges": "When files changed, and errors",
 	"s.cfgPluginSettingsDesc": "Each plugin's options (data.json).",

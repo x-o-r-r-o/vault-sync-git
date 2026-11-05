@@ -175,14 +175,14 @@ export class VaultSyncSettingTab extends PluginSettingTab {
 		/** GitHub refuses files over 100 MB without large file storage; other hosts (or LFS) allow up to 2000 MB here. */
 		const maxSizeCap = () => ((s.provider ?? "github") === "github" && !(s.lfsThresholdMB > 0) ? 100 : 2000);
 
-		type ToggleKey = "syncOnStartup" | "syncOnChange" | "syncOnResume" | "syncOnBackground" | "syncConfigDir" | "reviewBeforeManualSync" | "ignoreLineEndingChanges" | "deleteGuardEnabled" | "dailySnapshot" | "syncHidden" | "useGitignore" | "syncOnOpen" | "explorerBadges" | "keepEmptyFolders" | "syncHiddenNested" | "respectFrontmatter" | "statusCountdown" | "statusBranch";
+		type ToggleKey = "syncOnStartup" | "syncOnChange" | "syncOnResume" | "syncOnBackground" | "syncConfigDir" | "reviewBeforeManualSync" | "ignoreLineEndingChanges" | "deleteGuardEnabled" | "dailySnapshot" | "syncHidden" | "useGitignore" | "syncOnOpen" | "explorerBadges" | "explorerBadgesBefore" | "keepEmptyFolders" | "syncHiddenNested" | "respectFrontmatter" | "statusCountdown" | "statusBranch";
 		const toggle = (key: ToggleKey, reschedule = false, redraw = false) => (st: Setting): unknown =>
 			st.addToggle((c) =>
 				c.setValue(s[key]).onChange(async (v) => {
 					s[key] = v;
 					await save();
 					if (reschedule) p.rescheduleTriggers();
-					if (key === "explorerBadges" || key === "respectFrontmatter") p.refreshBadges();
+					if (key === "explorerBadges" || key === "explorerBadgesBefore" || key === "respectFrontmatter") p.refreshBadges();
 					if (key === "statusCountdown" || key === "statusBranch") p.updateStatusExtras();
 					if (redraw) this.refresh();
 				}),
@@ -196,21 +196,21 @@ export class VaultSyncSettingTab extends PluginSettingTab {
 			);
 		const cfgItems: Item[] = s.syncConfigDir
 			? [
-					{ name: t("s.cfgAppearance"), desc: t("s.cfgAppearanceDesc"), cls: "vsg-indent", render: cfgToggle("appearance") },
-					{ name: t("s.cfgSnippets"), cls: "vsg-indent", render: cfgToggle("snippets") },
-					{ name: t("s.cfgHotkeys"), cls: "vsg-indent", render: cfgToggle("hotkeys") },
-					{ name: t("s.cfgCore"), desc: t("s.cfgCoreDesc"), cls: "vsg-indent", render: cfgToggle("core") },
-					{ name: t("s.cfgPluginList"), desc: t("s.cfgPluginListDesc"), cls: "vsg-indent", render: cfgToggle("pluginList") },
-					{ name: t("s.cfgPluginCode"), desc: t("s.cfgPluginCodeDesc"), cls: "vsg-indent", render: cfgToggle("pluginCode") },
-					{ name: t("s.cfgInstall"), desc: t("s.cfgInstallDesc"), cls: "vsg-indent", render: cfgToggle("installFromReleases") },
-					{ name: t("s.cfgPluginSettings"), desc: t("s.cfgPluginSettingsDesc"), cls: "vsg-indent", render: cfgToggle("pluginSettings") },
-					{
-						name: t("s.cfgPerPlugin"),
-						desc: t("s.cfgPerPluginDesc", { n: Object.keys(s.configSync.plugins).length }),
-						cls: "vsg-indent",
-						render: (st) => st.addButton((b) => b.setButtonText(t("s.cfgPerPluginBtn")).onClick(() => new PluginSyncModal(this.app, p, () => this.refresh()).open())),
-					},
-				]
+				{ name: t("s.cfgAppearance"), desc: t("s.cfgAppearanceDesc"), cls: "vsg-indent", render: cfgToggle("appearance") },
+				{ name: t("s.cfgSnippets"), cls: "vsg-indent", render: cfgToggle("snippets") },
+				{ name: t("s.cfgHotkeys"), cls: "vsg-indent", render: cfgToggle("hotkeys") },
+				{ name: t("s.cfgCore"), desc: t("s.cfgCoreDesc"), cls: "vsg-indent", render: cfgToggle("core") },
+				{ name: t("s.cfgPluginList"), desc: t("s.cfgPluginListDesc"), cls: "vsg-indent", render: cfgToggle("pluginList") },
+				{ name: t("s.cfgPluginCode"), desc: t("s.cfgPluginCodeDesc"), cls: "vsg-indent", render: cfgToggle("pluginCode") },
+				{ name: t("s.cfgInstall"), desc: t("s.cfgInstallDesc"), cls: "vsg-indent", render: cfgToggle("installFromReleases") },
+				{ name: t("s.cfgPluginSettings"), desc: t("s.cfgPluginSettingsDesc"), cls: "vsg-indent", render: cfgToggle("pluginSettings") },
+				{
+					name: t("s.cfgPerPlugin"),
+					desc: t("s.cfgPerPluginDesc", { n: Object.keys(s.configSync.plugins).length }),
+					cls: "vsg-indent",
+					render: (st) => st.addButton((b) => b.setButtonText(t("s.cfgPerPluginBtn")).onClick(() => new PluginSyncModal(this.app, p, () => this.refresh()).open())),
+				},
+			]
 			: [];
 
 		const tokenDesc = () =>
@@ -263,28 +263,28 @@ export class VaultSyncSettingTab extends PluginSettingTab {
 		const enterpriseApp: Item[] =
 			s.provider === "github" && !/^https:\/\/api\.github\.com\/?$/i.test(p.getApiBase())
 				? [
-						{
-							name: t("app.clientId"),
-							desc: t("app.clientIdDesc"),
-							render: (st) =>
-								st.addText((c) =>
-									onCommit(c.setValue(p.customGitHubApp().clientId), async (v) => {
-										p.setCustomGitHubApp(v.trim(), p.customGitHubApp().slug);
-										this.refresh();
-									}),
-								),
-						},
-						{
-							name: t("app.slug"),
-							desc: t("app.slugDesc"),
-							render: (st) =>
-								st.addText((c) =>
-									onCommit(c.setValue(p.customGitHubApp().slug), async (v) => {
-										p.setCustomGitHubApp(p.customGitHubApp().clientId, v.trim());
-									}),
-								),
-						},
-					]
+					{
+						name: t("app.clientId"),
+						desc: t("app.clientIdDesc"),
+						render: (st) =>
+							st.addText((c) =>
+								onCommit(c.setValue(p.customGitHubApp().clientId), async (v) => {
+									p.setCustomGitHubApp(v.trim(), p.customGitHubApp().slug);
+									this.refresh();
+								}),
+							),
+					},
+					{
+						name: t("app.slug"),
+						desc: t("app.slugDesc"),
+						render: (st) =>
+							st.addText((c) =>
+								onCommit(c.setValue(p.customGitHubApp().slug), async (v) => {
+									p.setCustomGitHubApp(p.customGitHubApp().clientId, v.trim());
+								}),
+							),
+					},
+				]
 				: [];
 		// GitLab sign-in needs an OAuth application: the built-in one (gitlab.com, when registered) or your own.
 		if (s.provider === "gitlab" && (!GITLAB_APP.clientId || !/^https:\/\/gitlab\.com\/api\/v4\/?$/i.test(p.getApiBase()))) {
@@ -558,6 +558,7 @@ export class VaultSyncSettingTab extends PluginSettingTab {
 					{ name: t("s.onBackground"), desc: t("s.onBackgroundDesc"), render: toggle("syncOnBackground", true) },
 					{ name: t("s.onOpen"), desc: t("s.onOpenDesc"), render: toggle("syncOnOpen") },
 					{ name: t("s.badges"), desc: t("s.badgesDesc"), render: toggle("explorerBadges") },
+					{ name: t("s.badgesBefore"), desc: t("s.badgesBeforeDesc"), render: toggle("explorerBadgesBefore"), },
 					{
 						name: t("s.changeMarkers"),
 						desc: t("s.changeMarkersDesc"),
@@ -625,29 +626,29 @@ export class VaultSyncSettingTab extends PluginSettingTab {
 				collapsed: true,
 				items: p.isEncrypted()
 					? [
-							{
-								name: t("s.encOn"),
-								desc: p.encryptionUpgradable() ? `${t("s.encOnDesc")} ${t("e.upgradeDesc")}` : t("s.encOnDesc"),
-								render: (st) => {
-									if (p.encryptionUpgradable()) st.addButton((b) => b.setButtonText(t("e.upgrade")).setCta().onClick(() => void p.upgradeEncryption()));
-									return st
-										.addButton((b) => b.setButtonText(t("s.encRemovePlain")).onClick(() => p.removeUnencryptedFiles()))
-										.addButton((b) =>
-											destructive(b.setButtonText(t("s.encLock"))).onClick(async () => {
-												await p.lockEncryption();
-												this.refresh();
-											}),
-										);
-								},
+						{
+							name: t("s.encOn"),
+							desc: p.encryptionUpgradable() ? `${t("s.encOnDesc")} ${t("e.upgradeDesc")}` : t("s.encOnDesc"),
+							render: (st) => {
+								if (p.encryptionUpgradable()) st.addButton((b) => b.setButtonText(t("e.upgrade")).setCta().onClick(() => void p.upgradeEncryption()));
+								return st
+									.addButton((b) => b.setButtonText(t("s.encRemovePlain")).onClick(() => p.removeUnencryptedFiles()))
+									.addButton((b) =>
+										destructive(b.setButtonText(t("s.encLock"))).onClick(async () => {
+											await p.lockEncryption();
+											this.refresh();
+										}),
+									);
 							},
-						]
+						},
+					]
 					: [
-							{
-								name: t("s.encOff"),
-								desc: t("s.encOffDesc"),
-								render: (st) => st.addButton((b) => b.setButtonText(t("s.encTurnOn")).onClick(() => p.openEncryption(() => this.refresh()))),
-							},
-						],
+						{
+							name: t("s.encOff"),
+							desc: t("s.encOffDesc"),
+							render: (st) => st.addButton((b) => b.setButtonText(t("s.encTurnOn")).onClick(() => p.openEncryption(() => this.refresh()))),
+						},
+					],
 			},
 			{
 				heading: t("s.hShared"),
@@ -710,24 +711,24 @@ export class VaultSyncSettingTab extends PluginSettingTab {
 						render: (st) =>
 							p.isPaused()
 								? st.addButton((b) =>
-										b.setButtonText(t("h.resume")).setCta().onClick(() => {
-											p.resumeSync();
+									b.setButtonText(t("h.resume")).setCta().onClick(() => {
+										p.resumeSync();
+										this.refresh();
+									}),
+								)
+								: st
+									.addButton((b) =>
+										b.setButtonText(t("h.pause")).onClick(() => {
+											p.pauseSync(60);
 											this.refresh();
 										}),
 									)
-								: st
-										.addButton((b) =>
-											b.setButtonText(t("h.pause")).onClick(() => {
-												p.pauseSync(60);
-												this.refresh();
-											}),
-										)
-										.addButton((b) =>
-											b.setButtonText(t("s.pauseUntilResumed")).onClick(() => {
-												p.pauseSync(null);
-												this.refresh();
-											}),
-										),
+									.addButton((b) =>
+										b.setButtonText(t("s.pauseUntilResumed")).onClick(() => {
+											p.pauseSync(null);
+											this.refresh();
+										}),
+									),
 					},
 					{
 						name: t("s.include"),
@@ -930,9 +931,9 @@ export class VaultSyncSettingTab extends PluginSettingTab {
 					...(Platform.isMobile
 						? []
 						: [
-								{ name: t("s.statusCountdown"), desc: t("s.statusCountdownDesc"), render: toggle("statusCountdown") },
-								{ name: t("s.statusBranch"), desc: t("s.statusBranchDesc"), render: toggle("statusBranch") },
-							]),
+							{ name: t("s.statusCountdown"), desc: t("s.statusCountdownDesc"), render: toggle("statusCountdown") },
+							{ name: t("s.statusBranch"), desc: t("s.statusBranchDesc"), render: toggle("statusBranch") },
+						]),
 					{
 						name: t("s.resetState"),
 						desc: t("s.resetStateDesc"),

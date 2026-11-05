@@ -506,11 +506,24 @@
 	background: var(--color-accent);
 	vertical-align: middle;
 }
+.nav-file-title.vsg-x-pending-before .nav-file-title-content::before {
+	content: "";
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	margin-inline-end: 6px;
+	border-radius: 50%;
+	background: var(--color-accent);
+	vertical-align: middle;
+}
 .nav-file-title.vsg-x-conflict .nav-file-title-content {
 	color: var(--text-warning);
 }
 .nav-file-title.vsg-x-conflict .nav-file-title-content::after {
 	content: " ⚠";
+}
+.nav-file-title.vsg-x-conflict-before .nav-file-title-content::before {
+	content: "⚠ ";
 }
 
 /* Add a device: setup link and QR code */
