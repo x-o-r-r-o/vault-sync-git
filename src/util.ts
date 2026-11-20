@@ -161,3 +161,18 @@ export function urlHost(url: string): string | null {
 		return null;
 	}
 }
+
+const MIN_GITEA_CHROME = 151;
+
+/**
+ * Some Gitea / Forgejo servers answer API requests with a 403 "Browser update required" page when
+ * the User-Agent advertises Chromium older than 151. Obsidian's runtime UA carries its own app
+ * version, so keep it and only raise the Chromium version when the running app is older than that.
+ */
+// The UA is the only runtime source of Obsidian's own version here; it isn't used as an OS hint.
+const browserWindow = typeof window !== "undefined" ? window : undefined;
+export function giteaUserAgent(ua: string = browserWindow?.navigator.userAgent ?? ""): string {
+	const match = /Chrome\/(\d+)\.\d+(?:\.\d+)*/.exec(ua);
+	if (!match) return ua || `Mozilla/5.0 Chrome/${MIN_GITEA_CHROME}.0.0.0`;
+	return Number(match[1]) < MIN_GITEA_CHROME ? ua.replace(match[0], `Chrome/${MIN_GITEA_CHROME}.0.0.0`) : ua;
+}
