@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+**Fixed**
+- Gitea / Forgejo servers that reject old Chromium User-Agents (for example [Codefloe](https://codefloe.com/) "Browser update required" 403) now work: API and Git LFS requests keep Obsidian's runtime version but advertise a Chromium version the server accepts.
+
 ## 1.8.0 (2026-10-15)
 
 **New**

@@ -6,7 +6,7 @@ import type { HttpResponse, Transport } from "./http.ts";
 import { NotFastForward } from "./remote.ts";
 import { SyncError } from "./errors.ts";
 import type { BlobHint, CommitInfo, CommitRequest, CommitResult, Relation, Remote, TreeEntry, WebLink } from "./remote.ts";
-import { gitBlobSha } from "./util.ts";
+import { giteaUserAgent, gitBlobSha } from "./util.ts";
 
 export interface HostConfig {
 	token: string;
@@ -77,7 +77,7 @@ export class Gitea implements Remote {
 			{
 				url: this.base + path,
 				method,
-				headers: { Authorization: `token ${c.token}`, Accept: opts.accept ?? "application/json" },
+				headers: { Authorization: `token ${c.token}`, Accept: opts.accept ?? "application/json", "User-Agent": giteaUserAgent() },
 				body: body !== undefined ? JSON.stringify(body) : undefined,
 				contentType: body !== undefined ? "application/json" : undefined,
 			},

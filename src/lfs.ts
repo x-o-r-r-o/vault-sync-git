@@ -10,7 +10,7 @@ import { compileGlobs } from "./glob.ts";
 import { httpRequest, obsidianTransport } from "./http.ts";
 import type { Transport } from "./http.ts";
 import type { Remote } from "./remote.ts";
-import { encodeText } from "./util.ts";
+import { encodeText, giteaUserAgent } from "./util.ts";
 import { SyncError } from "./errors.ts";
 
 const SPEC = "version https://git-lfs.github.com/spec/v1";
@@ -114,6 +114,10 @@ export class LfsLayer implements Layer {
 	get trackedPatterns(): string[] {
 		return [...this.patterns];
 	}
+	/** Some servers reject old Chromium UAs on LFS endpoints too; other hosts keep their default UA. */
+	private get uaHeaders(): Record<string, string> {
+		return this.remote.kind === "gitea" ? { "User-Agent": giteaUserAgent() } : {};
+	}
 
 	constructor(remote: Remote, thresholdBytes: number, transport: Transport = obsidianTransport, lfsPatterns: string[] = []) {
 		this.remote = remote;
@@ -154,7 +158,7 @@ export class LfsLayer implements Layer {
 			{
 				url: `${this.remote.gitUrl()}/info/lfs/objects/batch`,
 				method: "POST",
-				headers: { Accept: "application/vnd.git-lfs+json", Authorization: this.remote.authHeader() },
+				headers: { Accept: "application/vnd.git-lfs+json", Authorization: this.remote.authHeader(), ...this.uaHeaders },
 				contentType: "application/vnd.git-lfs+json",
 				body: JSON.stringify({ operation, transfers: ["basic"], objects: [{ oid, size }] }),
 			},
@@ -169,12 +173,12 @@ export class LfsLayer implements Layer {
 		const obj = await this.batch("upload", oid, data.byteLength);
 		const up = obj?.actions?.upload;
 		if (!up) return; // the host already has this object
-		await httpRequest(this.transport, { url: up.href, method: "PUT", headers: { ...(up.header ?? {}), "Content-Type": "application/octet-stream" }, body: data }, { hostLabel: `${this.remote.label} LFS`, idempotent: true });
+		await httpRequest(this.transport, { url: up.href, method: "PUT", headers: { ...(up.header ?? {}), "Content-Type": "application/octet-stream", ...this.uaHeaders }, body: data }, { hostLabel: `${this.remote.label} LFS`, idempotent: true });
 		const verify = obj?.actions?.verify;
 		if (verify) {
 			await httpRequest(
 				this.transport,
-				{ url: verify.href, method: "POST", headers: { ...(verify.header ?? {}), Accept: "application/vnd.git-lfs+json" }, contentType: "application/vnd.git-lfs+json", body: JSON.stringify({ oid, size: data.byteLength }) },
+				{ url: verify.href, method: "POST", headers: { ...(verify.header ?? {}), Accept: "application/vnd.git-lfs+json", ...this.uaHeaders }, contentType: "application/vnd.git-lfs+json", body: JSON.stringify({ oid, size: data.byteLength }) },
 				{ hostLabel: `${this.remote.label} LFS`, idempotent: true },
 			);
 		}
@@ -185,7 +189,7 @@ export class LfsLayer implements Layer {
 		const obj = await this.batch("download", oid, size);
 		const down = obj?.actions?.download;
 		if (!down) throw new SyncError("lfsMissing", { path });
-		return (await httpRequest(this.transport, { url: down.href, method: "GET", headers: down.header ?? {} }, { hostLabel: `${this.remote.label} LFS`, idempotent: true })).arrayBuffer;
+		return (await httpRequest(this.transport, { url: down.href, method: "GET", headers: { ...(down.header ?? {}), ...this.uaHeaders } }, { hostLabel: `${this.remote.label} LFS`, idempotent: true })).arrayBuffer;
 	}
 }
 
