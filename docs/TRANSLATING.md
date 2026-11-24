@@ -9,6 +9,6 @@ The interface follows Obsidian's language setting (*Settings → General → Lan
 
 At runtime a missing key falls back to English, but `npm test` requires every key (with the same `{placeholders}`), so a new language needs the whole file.
 
-Available (all complete): English, Simplified Chinese (`zh`), German (`de`), Spanish (`es`), French (`fr`), Japanese (`ja`), Korean (`ko`) and Brazilian Portuguese (`pt`) and Russian (`ru`). German, Spanish, French, Japanese, Korean and Portuguese were machine-assisted in 1.2.0; corrections from native speakers are very welcome. A catalog is looked up by the full language code first, then by its first part, so `pt-BR` uses `pt` and `zh-TW` falls back to `zh`.
+Available (all complete): English, Simplified Chinese (`zh`), German (`de`), Spanish (`es`), French (`fr`), Japanese (`ja`), Korean (`ko`), Brazilian Portuguese (`pt`) and Russian (`ru`). German, Spanish, French, Japanese, Korean and Portuguese were machine-assisted in 1.2.0; corrections from native speakers are very welcome. A catalog is looked up by the full language code first, then by its first part, so `pt-BR` uses `pt` and `zh-TW` falls back to `zh`.
 
 `npm test` checks that every catalog has every key with the same `{placeholders}`.
