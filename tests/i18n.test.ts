@@ -30,7 +30,7 @@ test("i18n: Simplified Chinese covers every English key, with the same placehold
 test("i18n: every catalog covers every English key, with the same placeholders", async () => {
 	const { en } = await import("../src/locales/en.ts");
 	const ph = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort().join(",");
-	for (const lang of ["de", "es", "fr", "ja", "ko", "pt"]) {
+	for (const lang of ["de", "es", "fr", "ja", "ko", "pt", "ru"]) {
 		const cat = (await import(`../src/locales/${lang}.ts`))[lang] as Record<string, string>;
 		const missing = Object.keys(en).filter((k) => !(k in cat));
 		const extra = Object.keys(cat).filter((k) => !(k in en));
