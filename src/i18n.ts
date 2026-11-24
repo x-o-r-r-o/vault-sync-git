@@ -12,12 +12,13 @@ import { fr } from "./locales/fr.ts";
 import { ja } from "./locales/ja.ts";
 import { ko } from "./locales/ko.ts";
 import { pt } from "./locales/pt.ts";
+import { ru } from "./locales/ru.ts";
 
 export type Key = keyof typeof en;
 
 
 // Looked up by Obsidian's language code, then by its first part ("pt-BR" → "pt", "zh-TW" → "zh").
-const catalogs: Record<string, Partial<Record<Key, string>>> = { zh, de, es, fr, ja, ko, pt };
+const catalogs: Record<string, Partial<Record<Key, string>>> = { zh, de, es, fr, ja, ko, pt, ru };
 
 function language(): string {
 	try {
